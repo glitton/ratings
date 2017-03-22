@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<h1>{{ movie.title }}</h1>
+
+
+<ul>
+    {% if movie.imdb_url == None %}
+        <li><b>IMDB URL</b>: Not specified</li>
+    {% elif movie.imdb_url == "" %}
+        <li><b>IMDB URL</b>: Not specified</li>    
+    {% else %}
+        <li><b>IMBD URL</b>: {{ movie.imdb_url }}</li>
+    {% endif %}
+    
+    <br>
+
+    <h3>Ratings</h3>
+
+    {% for rating in ratings %}
+        <li><b>Score</b>: {{ rating.score}}</li>
+    {% endfor %}
+
+
+</ul>
+
+{% if session.get("logged_in_user_id") %}
+    <h3>Add a Rating</h3>
+    <form action="/add-rating" method="POST">
+        Your Rating: <input type='number' name='rating'><br>
+        <input type="submit">
+{% endif %}
+
+{% endblock %}

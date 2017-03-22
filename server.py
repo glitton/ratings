@@ -36,6 +36,65 @@ def user_list():
     return render_template("user_list.html", users=users)
 
 
+@app.route("/users/<user_id>")
+def show_user_info(user_id):
+    """Shows information about the user."""
+
+    user = User.query.filter(User.user_id == user_id).first()
+    user_ratings = user.ratings
+
+    return render_template("/user_info.html", user=user,
+                            ratings=user_ratings)    
+
+
+@app.route("/movies")
+def movie_list():
+    """Show list of movies."""
+
+    movies = Movie.query.order_by(Movie.title).all()
+    return render_template("movie_list.html", movies=movies)
+
+
+@app.route("/movies/<movie_id>")
+def show_movie_info(movie_id):
+    """Shows information about the movie."""
+
+    movie = Movie.query.filter(Movie.movie_id == movie_id).first()
+    movie_ratings = movie.ratings
+
+    return render_template("/movie_info.html", movie=movie,
+                            ratings=movie_ratings)
+
+
+@app.route("/add-rating", methods=["POST"])
+def add_rating_to_db():
+    """Add user rating to database"""
+
+    user_rating = request.form.get("rating")
+    user_id = session["logged_in_user_id"]
+    movie_id = request.args.get("movie_id")
+
+    rating = Rating.query.filter(Rating.user_id == user_id, 
+                                 Rating.movie_id == movie_id).first()
+
+    # If the rating does not already exist, add it to the database
+    if not rating:
+        rating = Rating(user_id=user_id, movie_id=movie_id, score=rating)
+        db.session.add(rating)
+        db.session.commit()
+        flash("Added rating.")
+        return redirect("/movies/" + movie_id)
+
+    # # Checks to see if password is correct
+    # if user.password != user_password:
+    #     flash("Password incorrect, please try again.")
+    #     return redirect("/login")
+    # else:
+    #     session["logged_in_user_id"] = user.user_id
+    #     flash("Successfully logged in as %s" % (user_email))
+    #     return redirect("/users/" + str(user.user_id))
+
+
 @app.route("/register", methods=["GET"])
 def show_registration_form():
     """Show registration form"""
@@ -55,6 +114,7 @@ def process_registration_form():
         new_user = User(email=user_email, password=user_password)
         db.session.add(new_user)
         db.session.commit()
+        session["logged_in_user_id"] = new_user.user_id
         flash("Successfully created new account! Welcome %s" % (user_email))
         return redirect("/")
     else:
@@ -89,7 +149,7 @@ def process_login_form():
     else:
         session["logged_in_user_id"] = user.user_id
         flash("Successfully logged in as %s" % (user_email))
-        return redirect("/")
+        return redirect("/users/" + str(user.user_id))
 
 
 @app.route("/logout")
@@ -102,15 +162,8 @@ def logout_user():
     return redirect("/")
 
 
-@app.route("/users/<user_id>")
-def show_user_info(user_id):
-    """Shows information about the user."""
+ 
 
-    user = User.query.filter(User.user_id == user_id).first()
-    user_ratings = user.ratings
-
-    return render_template("/user_info.html", user=user,
-                            ratings=user_ratings)    
 
 
 if __name__ == "__main__":
