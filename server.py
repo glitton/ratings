@@ -82,6 +82,7 @@ def process_login_form():
         flash("User does not exist. Please create an account")
         return redirect("/register")
 
+    # Checks to see if password is correct
     if user.password != user_password:
         flash("Password incorrect, please try again.")
         return redirect("/login")
@@ -99,6 +100,17 @@ def logout_user():
     flash("Successfully logged out.")
 
     return redirect("/")
+
+
+@app.route("/users/<user_id>")
+def show_user_info(user_id):
+    """Shows information about the user."""
+
+    user = User.query.filter(User.user_id == user_id).first()
+    user_ratings = user.ratings
+
+    return render_template("/user_info.html", user=user,
+                            ratings=user_ratings)    
 
 
 if __name__ == "__main__":

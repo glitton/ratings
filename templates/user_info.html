@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if user.email == None %}
+<h1>Email not specified</h1>
+{% else %}
+<h1>{{ user.email }}</h1>
+{% endif %}
+
+<ul>
+    {% if user.age == None %}
+    <li><b>Age</b>: Not specified</li>
+    {% else %}
+    <li><b>Age</b>: {{ user.age }}</li>
+    {% endif %}
+    
+
+    {% if user.zipcode == None %}
+    <li><b>Zipcode</b>: Not specified</li>
+    {% else %}
+    <li><b>Zipcode</b>: {{ user.zipcode }}</li>
+    {% endif %}
+    <br>
+
+    <h3>Movies</h3>
+
+    {% for rating in ratings %}
+    <li><b>Title</b>: {{ rating.movie.title }}, <b>Score</b>: {{ rating.score}}</li>
+    {% endfor %}
+
+
+</ul>
+
+
+
+{% endblock %}
