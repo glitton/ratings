@@ -12,7 +12,7 @@ from model import User, Rating, Movie, connect_to_db, db
 app = Flask(__name__)
 
 # Required to use Flask sessions and the debug toolbar
-app.secret_key = "ABC"
+app.secret_key = "suefgbkuzyfbaidfhalieufhaefh"
 
 # Normally, if you use an undefined variable in Jinja2, it fails
 # silently. This is horrible. Fix this so that, instead, it raises an
@@ -35,7 +35,72 @@ def user_list():
     users = User.query.all()
     return render_template("user_list.html", users=users)
 
-    
+
+@app.route("/register", methods=["GET"])
+def show_registration_form():
+    """Show registration form"""
+
+    return render_template("registration_form.html")
+   
+
+@app.route("/register", methods=["POST"])
+def process_registration_form():
+    """Process registration form"""
+
+    user_email = request.form.get("email")
+    user_password = request.form.get("password")
+
+    user = User.query.filter(User.email == user_email).first()
+    if not user:
+        new_user = User(email=user_email, password=user_password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash("Successfully created new account! Welcome %s" % (user_email))
+        return redirect("/")
+    else:
+        flash("Account already exists. Please log in")
+        return redirect("/login")
+
+
+@app.route("/login", methods=["GET"])
+def show_login_form():
+    """Show login form"""
+
+    return render_template("login_form.html")
+
+
+@app.route("/login", methods=["POST"])
+def process_login_form():
+    """Process login form"""
+
+    user_email = request.form.get("email")
+    user_password = request.form.get("password")
+
+    user = User.query.filter(User.email == user_email).first()
+    # If the user does not exist, we'll send them to the registration page
+    if not user:
+        flash("User does not exist. Please create an account")
+        return redirect("/register")
+
+    if user.password != user_password:
+        flash("Password incorrect, please try again.")
+        return redirect("/login")
+    else:
+        session["logged_in_user_id"] = user.user_id
+        flash("Successfully logged in as %s" % (user_email))
+        return redirect("/")
+
+
+@app.route("/logout")
+def logout_user():
+    """Removes session and logs user out"""
+
+    del session["logged_in_user_id"]
+    flash("Successfully logged out.")
+
+    return redirect("/")
+
+
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension

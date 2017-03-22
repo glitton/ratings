@@ -8,5 +8,15 @@
 
 <h2>Users</h2>
 <p><a href="/users">View all users</a></p>
+<br><br>
+
+{% if not session.get("logged_in_user_id") %}
+    <p><a href="/register">Register Here</a></p>
+    <p><a href="/login">Log In</a></p>
+
+{% else %}
+
+    <p><a href="/logout">Log Out</a></p>
+{% endif %}
 
 {% endblock %}
