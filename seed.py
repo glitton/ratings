@@ -60,7 +60,7 @@ def load_movies():
         else:
             released_at = None
 
-        imdb = row[3]  # IMDB url is the 4th item in each row    
+        imdb = row[4]  # IMDB url is the 5th item in each row    
 
         # Instantiating the Movie object so we can add to our database
         movie = Movie(movie_id=movie_id,

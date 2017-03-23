@@ -1,6 +1,7 @@
 """Models and database functions for Ratings project."""
 
 from flask_sqlalchemy import SQLAlchemy
+from correlation import pearson
 
 # This is the connection to the PostgreSQL database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
@@ -29,6 +30,59 @@ class User(db.Model):
         return "<User user_id=%s email=%s>" % (self.user_id,
                                                self.email)
 
+    def similarity(self, other):
+        """Return Pearson rating for user compared to other user.
+
+        u_ratings is a dictionary with the format:
+
+        u_ratings = {movie_id: <rating object>,
+                     movie_id: <rating object>,
+                     movie_id: <rating object>}
+        """
+
+        u_ratings = {}
+        paired_ratings = []
+
+        for rating_obj in self.ratings:
+            u_ratings[rating_obj.movie_id] = rating_obj
+
+        for rating_obj in other.ratings:
+            dict_value = u_ratings.get(rating_obj.movie_id)
+            if dict_value:
+                paired_ratings.append( (dict_value.score, rating_obj.score) )
+
+        if paired_ratings:
+            return pearson(paired_ratings)
+
+        else:
+            return 0.0
+
+
+
+    def predict_rating(self, movie):
+        """Predict user's rating of a movie."""
+
+        other_ratings = movie.ratings
+
+        similarities = [
+            (self.similarity(r.user), r)
+            for r in other_ratings
+        ]
+
+        similarities.sort(reverse=True)
+
+        similarities = [(sim, r) for sim, r in similarities
+                        if sim > 0]
+
+        if not similarities:
+            return None
+
+        numerator = sum([r.score * sim for sim, r in similarities])
+        denominator = sum([sim for sim, r in similarities])
+
+        return numerator/denominator
+
+                
 
 # Put your Movie and Rating model classes here.
 class Movie(db.Model):
@@ -37,9 +91,9 @@ class Movie(db.Model):
     __tablename__ = "movies"
 
     movie_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(250), nullable=False)
     released_at = db.Column(db.DateTime, nullable=True)
-    imdb_url = db.Column(db.String(100), nullable=False)
+    imdb_url = db.Column(db.String(250), nullable=False)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
@@ -87,6 +141,7 @@ def connect_to_db(app):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)
+
 
 
 if __name__ == "__main__":

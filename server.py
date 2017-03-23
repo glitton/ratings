@@ -72,27 +72,28 @@ def add_rating_to_db():
 
     user_rating = request.form.get("rating")
     user_id = session["logged_in_user_id"]
-    movie_id = request.args.get("movie_id")
+    movie_id = request.form.get("movie_id")
 
+    # Check to see if rating already exists in the database
+    # If it's not there, .first() will return None
     rating = Rating.query.filter(Rating.user_id == user_id, 
                                  Rating.movie_id == movie_id).first()
 
     # If the rating does not already exist, add it to the database
     if not rating:
-        rating = Rating(user_id=user_id, movie_id=movie_id, score=rating)
+        rating = Rating(user_id=user_id, movie_id=movie_id, score=user_rating)
         db.session.add(rating)
         db.session.commit()
         flash("Added rating.")
         return redirect("/movies/" + movie_id)
 
-    # # Checks to see if password is correct
-    # if user.password != user_password:
-    #     flash("Password incorrect, please try again.")
-    #     return redirect("/login")
-    # else:
-    #     session["logged_in_user_id"] = user.user_id
-    #     flash("Successfully logged in as %s" % (user_email))
-    #     return redirect("/users/" + str(user.user_id))
+    #  If the rating already exists in the database for that user
+    #  update the rating to reflect the new score
+    else:
+        rating.score = user_rating
+        db.session.commit()
+        flash("Updated rating.")
+        return redirect("/movies/" + movie_id)
 
 
 @app.route("/register", methods=["GET"])
