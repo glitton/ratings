@@ -47,7 +47,7 @@ class User(db.Model):
             u_ratings[rating_obj.movie_id] = rating_obj
 
         for rating_obj in other.ratings:
-            dict_value = u_ratings.get(rating_obj.movie_id)
+            dict_value = u_ratings.get(rating_obj.movie_id)  # have they rated the same movie that u_ratings did
             if dict_value:
                 paired_ratings.append( (dict_value.score, rating_obj.score) )
 

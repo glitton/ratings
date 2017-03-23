@@ -13,11 +13,22 @@
     {% else %}
         <li><b>IMBD URL</b>: <a href="{{ movie.imdb_url }}">{{ movie.imdb_url }}</a></li>
     {% endif %}
-    
+</ul>
     <br>
 
-    <h3>Ratings</h3>
+    <p><b>Average rating</b>: {{ average }}</p>
 
+    {% if prediction %}
+        <p>We predict you will rate this movie {{ prediction }}.</p>
+    {% endif %}
+
+    {% if user_rating %}
+        <p><b>The Eye says</b>: {{ beratement }}</p>
+    {% endif %}
+
+
+    <h3>Ratings</h3>
+<ul>
     {% for rating in ratings %}
         <li><b>Score</b>: {{ rating.score}}</li>
     {% endfor %}
