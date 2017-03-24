@@ -55,6 +55,27 @@ def movie_list():
     return render_template("movie_list.html", movies=movies)
 
 
+@app.route("/top-movies")
+def show_top_movies():
+    """Show top 50 movies from the database."""
+    avg_movies = []  # empty movie list
+
+    movies = Movie.query.all()
+    for movie in movies:
+        # ratings = movie.ratings
+        rating_scores = [rating.score for rating in movie.ratings]
+        avg_rating = float(sum(rating_scores)) / len(rating_scores)
+        avg_movies.append((avg_rating, movie))
+    
+    avg_movies.sort(reverse=True)  # sorted avg_movies list, tuples
+    print "\n\n"
+    print avg_movies
+    print "\n\n"
+    avg_movies = avg_movies[:51]
+   
+    return render_template("top_movies.html", movies=avg_movies)
+
+
 @app.route("/movies/<movie_id>")
 def show_movie_info(movie_id):
     """Shows information about the movie.

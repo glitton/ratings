@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <h2>Top 50 Movies</h2>
+    <ul>
+      {% for avg, movie in movies %}
+          <li>
+              <a href="/movies/{{ movie.movie_id }}">
+                {{ movie.title }}</a>, Average score: {{'%0.2f'| format(avg|float)}}
+
+
+          </li>   
+      {% endfor %}
+    </ul>
+
+    {% if session.get("logged_in_user_id") %}
+    <form action="/add-rating" method="POST">
+      
+      <select name="movie_id">
+        {% for avg, movie in movies %}
+        <option value="{{ movie.movie_id }}"> {{ movie.title }} </option>
+        {% endfor %}
+      </select>
+      
+      Rating: <input type="number" name="rating">  
+      <input type="submit">
+
+     </form>
+    {% endif %}
+
+{% endblock %}
